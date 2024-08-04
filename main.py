@@ -1,8 +1,9 @@
 import pygame
 import sys
+import ai
 
 class Tictactoe:
-    def __init__(self) -> None:
+    def __init__(self, ai_round_bool=True, ai_cross_bool=True) -> None:
         # 画面サイズ
         self.width = 600
         self.height = 600
@@ -13,6 +14,16 @@ class Tictactoe:
         self.red = (255, 0, 0)
         self.blue = (0, 0, 255)
 
+        # aiの設定
+        self.ai_round_bool = ai_round_bool
+        self.ai_cross_bool = ai_cross_bool
+        if ai_round_bool:
+            # self.ai_round = ai.RandomAi('O')
+            self.ai_round = ai.MinimaxAi('O')            
+        if ai_cross_bool:
+            # self.ai_cross = ai.RandomAi('X')
+            self.ai_cross = ai.MinimaxAi('X')
+        
     def init_board(self):
         # 盤面を初期化
         return [['' for _ in range(3)] for _ in range(3)]
@@ -83,14 +94,11 @@ class Tictactoe:
                     if self.game_over:
                         return  # ゲームループを抜ける
                     
-                    mouseX, mouseY = pygame.mouse.get_pos()
-                    # クリックされたマス目を特定
-                    clicked_row = mouseY // (self.height // 3)
-                    clicked_col = mouseX // (self.width // 3)
-                    
-                    if self.board[clicked_row][clicked_col] == '':
-                        # マス目が空の場合、マークを描画
-                        self.board[clicked_row][clicked_col] = self.current_player
+                    if self.ai_round_bool and self.current_player == 'O':
+                        # ●AIプレイヤー用イベント処理
+                        cell = self.ai_round.get_next_action(self.board)
+                        self.board[cell[0]][cell[1]] = 'O'
+                        
                         winner = self.check_winner()
                         if winner:
                             # 勝者がいる場合、ゲーム終了
@@ -101,7 +109,41 @@ class Tictactoe:
                         else:
                             # 次のプレイヤーに交代
                             self.current_player = 'O' if self.current_player == 'X' else 'X'
-            
+                    elif self.ai_cross_bool and self.current_player == 'X':
+                        # ×AIプレイヤー用イベント処理
+                        cell = self.ai_cross.get_next_action(self.board)
+                        self.board[cell[0]][cell[1]] = 'X'
+                        
+                        winner = self.check_winner()
+                        if winner:
+                            # 勝者がいる場合、ゲーム終了
+                            self.game_over = True
+                        elif self.is_board_full():
+                            # 引き分けの場合、ゲーム終了
+                            self.game_over = True
+                        else:
+                            # 次のプレイヤーに交代
+                            self.current_player = 'O' if self.current_player == 'X' else 'X'
+                    else:
+                        mouseX, mouseY = pygame.mouse.get_pos()
+                        # クリックされたマス目を特定
+                        clicked_row = mouseY // (self.height // 3)
+                        clicked_col = mouseX // (self.width // 3)
+                        
+                        if self.board[clicked_row][clicked_col] == '':
+                            # マス目が空の場合、マークを描画
+                            self.board[clicked_row][clicked_col] = self.current_player
+                            winner = self.check_winner()
+                            if winner:
+                                # 勝者がいる場合、ゲーム終了
+                                self.game_over = True
+                            elif self.is_board_full():
+                                # 引き分けの場合、ゲーム終了
+                                self.game_over = True
+                            else:
+                                # 次のプレイヤーに交代
+                                self.current_player = 'O' if self.current_player == 'X' else 'X'
+
             self.screen.fill(self.white)
             self.draw_board()
             
@@ -127,5 +169,5 @@ class Tictactoe:
 
 
 if __name__ == '__main__':
-    game = tictactoe()
+    game = Tictactoe(ai_round_bool=True, ai_cross_bool=False)
     game.start_game()

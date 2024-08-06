@@ -1,2 +1,2 @@
 # TicTacToe
-[こちら](https://abyssal-nexus.com/?p=70)の記事で紹介している○×ゲームのプログラムです。
+詳細は[こちら](https://abyssal-nexus.com/?p=70)をご確認ください。
